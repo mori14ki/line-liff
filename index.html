@@ -11,17 +11,31 @@
 
     liff.init({ liffId: LIFF_ID })
       .then(async () => {
-        document.getElementById('msg').textContent = 'LIFF初期化成功';
-
         if (!liff.isLoggedIn()) {
-          document.getElementById('msg').textContent = 'ログインへ移動中';
           liff.login();
           return;
         }
 
-        document.getElementById('msg').textContent = 'プロフィール取得中';
         const profile = await liff.getProfile();
-        document.getElementById('msg').textContent = '完了: ' + profile.userId;
+        const userId = profile.userId;
+
+        // refを取得
+        const params = new URLSearchParams(window.location.search);
+        const liffState = params.get('liff.state') || '';
+        const stateParams = new URLSearchParams(liffState.replace(/^\?/, ''));
+        const ref = stateParams.get('ref') || params.get('ref') || 'direct';
+
+        document.getElementById('msg').textContent = 'ref: ' + ref + ' / userId: ' + userId;
+
+        // DB保存
+        await fetch('https://rtjaizuykbaojhdhjvcg.supabase.co/functions/v1/save-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, ref: ref }),
+        });
+
+        // 友だち追加ページへ
+        window.location.href = 'https://line.me/R/ti/p/@101ddfgc';
       })
       .catch((err) => {
         document.getElementById('msg').textContent = 'エラー: ' + err.message;
