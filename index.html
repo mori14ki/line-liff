@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>LINE Friend Add CV</title>
+  <title>LINE Friend Add CV Test</title>
 
   <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TWYH9DC4V0"></script>
@@ -44,7 +44,6 @@
   <script>
     const LIFF_ID = '2009878948-BRNmx1Mn';
     const GA4_EVENT_NAME = 'line_friend_add';
-    const STORAGE_KEY = 'line_friend_add_sent_v1';
 
     let closeStarted = false;
 
@@ -82,17 +81,14 @@
         event_label: 'friend_true',
         event_callback: function () {
           callbackReturned = true;
-          localStorage.setItem(STORAGE_KEY, '1');
           closeLiffSafely();
         },
         event_timeout: 3000
       });
 
-      // 念のためのフォールバック
-      // event_callback が返らない場合でも、3.5秒後に閉じる
+      // event_callback が返らない場合のフォールバック
       setTimeout(function () {
         if (!callbackReturned) {
-          localStorage.setItem(STORAGE_KEY, '1');
           closeLiffSafely();
         }
       }, 3500);
@@ -104,7 +100,6 @@
     })
     .then(function () {
       setStatus('liff.init done');
-
       return liff.getFriendship();
     })
     .then(function (data) {
@@ -114,7 +109,6 @@
         setStatus('not friend');
         return;
       }
-
 
       fireGa4AndClose();
     })
