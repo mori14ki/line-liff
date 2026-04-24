@@ -3,35 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://www.googletagmanager.com/gtag/js?id=G-TWYH9DC4V0"></script>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TWYH9DC4V0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){ dataLayer.push(arguments); }
+
     gtag('js', new Date());
-    gtag('config', 'G-TWYH9DC4V0');
+
+    gtag('config', 'G-TWYH9DC4V0', {
+      debug_mode: true
+    });
   </script>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
   <p id="s">loading...</p>
+
   <script>
-    liff.init({
-      liffId: '2009878948-BRNmx1Mn',
-      withLoginOnExternalBrowser: true
-    })
-    .then(function() {
-      return liff.getFriendship();
-    })
-    .then(function(data) {
-      if (data.friendFlag) {
-        gtag('event', 'line_friend_add');
-        document.getElementById('s').innerText = 'sent';
-      } else {
-        document.getElementById('s').innerText = 'not friend';
-      }
-    })
-    .catch(function(err) {
-      document.getElementById('s').innerText = 'error: ' + JSON.stringify(err);
+    function setStatus(text) {
+      document.getElementById('s').innerText = text;
+    }
+
+    window.addEventListener('load', function () {
+      setStatus('loaded. sending ga4...');
+
+      gtag('event', 'line_friend_add_test_webview_no_liff', {
+        debug_mode: true,
+        event_category: 'liff_test',
+        event_label: 'webview_no_liff_no_close',
+        event_callback: function () {
+          setStatus('ga4 callback returned. keep this screen open.');
+        },
+        event_timeout: 3000
+      });
+
+      setTimeout(function () {
+        setStatus('3 seconds passed. keep this screen open.');
+      }, 3000);
     });
   </script>
 </body>
