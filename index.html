@@ -115,21 +115,6 @@
         return;
       }
 
-      const alreadySent = localStorage.getItem(STORAGE_KEY);
-
-      if (alreadySent === '1') {
-        setStatus('already sent. closing...');
-
-        setTimeout(function () {
-          if (liff.isInClient()) {
-            liff.closeWindow();
-          } else {
-            setStatus('already sent. not in LINE client.');
-          }
-        }, 500);
-
-        return;
-      }
 
       fireGa4AndClose();
     })
