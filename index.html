@@ -9,10 +9,43 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-TWYH9DC4V0');
-    gtag('event', 'line_friend_add');
   </script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <p>GA4テスト</p>
+  <script>
+    function closeAfterTracking(shouldTrack) {
+      if (shouldTrack) {
+        var closed = false;
+        function doClose() {
+          if (!closed) {
+            closed = true;
+            liff.closeWindow();
+          }
+        }
+        gtag('event', 'line_friend_add', {
+          event_callback: doClose
+        });
+        // 2秒待っても callback が来なければ強制クローズ
+        setTimeout(doClose, 2000);
+      } else {
+        liff.closeWindow();
+      }
+    }
+
+    liff.init({
+      liffId: '2009878948-BRNmx1Mn',
+      withLoginOnExternalBrowser: true
+    })
+    .then(function() {
+      return liff.getFriendship();
+    })
+    .then(function(data) {
+      closeAfterTracking(data.friendFlag);
+    })
+    .catch(function(err) {
+      liff.closeWindow();
+    });
+  </script>
 </body>
 </html>
