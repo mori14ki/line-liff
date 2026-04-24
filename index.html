@@ -15,31 +15,49 @@
       debug_mode: true
     });
   </script>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <p id="s">loading...</p>
+  <p id="s">start</p>
 
   <script>
     function setStatus(text) {
       document.getElementById('s').innerText = text;
+      console.log(text);
     }
 
-    window.addEventListener('load', function () {
-      setStatus('loaded. sending ga4...');
+    setStatus('1. page loaded');
 
-      gtag('event', 'line_friend_add_test_webview_no_liff', {
-        debug_mode: true,
-        event_category: 'liff_test',
-        event_label: 'webview_no_liff_no_close',
-        event_callback: function () {
-          setStatus('ga4 callback returned. keep this screen open.');
-        },
-        event_timeout: 3000
-      });
+    liff.init({
+      liffId: '2009878948-BRNmx1Mn',
+      withLoginOnExternalBrowser: true
+    })
+    .then(function() {
+      setStatus('2. liff.init done / isInClient=' + liff.isInClient());
+      return liff.getFriendship();
+    })
+    .then(function(data) {
+      setStatus('3. getFriendship done / friendFlag=' + data.friendFlag);
 
-      setTimeout(function () {
-        setStatus('3 seconds passed. keep this screen open.');
-      }, 3000);
+      if (data.friendFlag) {
+        gtag('event', 'line_friend_add_test_liff_no_close', {
+          debug_mode: true,
+          event_category: 'liff_test',
+          event_label: 'friend_true_no_close',
+          event_callback: function () {
+            setStatus('4. GA4 callback returned / no close');
+          },
+          event_timeout: 3000
+        });
+
+        setStatus('3.5 GA4 event fired / waiting callback');
+      } else {
+        setStatus('not friend');
+      }
+    })
+    .catch(function(err) {
+      setStatus('error: ' + JSON.stringify(err));
     });
   </script>
 </body>
