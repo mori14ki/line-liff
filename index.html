@@ -4,9 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-P5VHKJL6');</script>
 </head>
 <body>
-  <p id="s">loading...</p>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5VHKJL6"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script>
     liff.init({
       liffId: '2009878948-BRNmx1Mn',
@@ -16,10 +22,14 @@
       return liff.getFriendship();
     })
     .then(function(data) {
-      document.getElementById('s').innerText = 'friendFlag: ' + data.friendFlag;
+      if (data.friendFlag) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ event: 'line_friend_add' });
+      }
+      liff.closeWindow();
     })
     .catch(function(err) {
-      document.getElementById('s').innerText = 'error: ' + JSON.stringify(err);
+      liff.closeWindow();
     });
   </script>
 </body>
