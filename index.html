@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>LINE Friend Add CV</title>
+
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TWYH9DC4V0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -16,47 +19,121 @@
     });
   </script>
 
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 24px;
+      text-align: center;
+      color: #222;
+    }
+
+    #s {
+      font-size: 16px;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+  </style>
 </head>
+
 <body>
-  <p id="s">start</p>
+  <p id="s">loading...</p>
 
   <script>
+    const LIFF_ID = '2009878948-BRNmx1Mn';
+    const GA4_EVENT_NAME = 'line_friend_add';
+    const STORAGE_KEY = 'line_friend_add_sent_v1';
+
+    let closeStarted = false;
+
     function setStatus(text) {
-      document.getElementById('s').innerText = text;
+      const statusEl = document.getElementById('s');
+      if (statusEl) {
+        statusEl.innerText = text;
+      }
       console.log(text);
     }
 
-    setStatus('1. page loaded');
+    function closeLiffSafely() {
+      if (closeStarted) return;
+      closeStarted = true;
+
+      setStatus('sent. closing...');
+
+      setTimeout(function () {
+        if (typeof liff !== 'undefined' && liff.isInClient()) {
+          liff.closeWindow();
+        } else {
+          setStatus('sent. not in LINE client.');
+        }
+      }, 500);
+    }
+
+    function fireGa4AndClose() {
+      setStatus('sending...');
+
+      let callbackReturned = false;
+
+      gtag('event', GA4_EVENT_NAME, {
+        debug_mode: true,
+        event_category: 'liff',
+        event_label: 'friend_true',
+        event_callback: function () {
+          callbackReturned = true;
+          localStorage.setItem(STORAGE_KEY, '1');
+          closeLiffSafely();
+        },
+        event_timeout: 3000
+      });
+
+      // 念のためのフォールバック
+      // event_callback が返らない場合でも、3.5秒後に閉じる
+      setTimeout(function () {
+        if (!callbackReturned) {
+          localStorage.setItem(STORAGE_KEY, '1');
+          closeLiffSafely();
+        }
+      }, 3500);
+    }
 
     liff.init({
-      liffId: '2009878948-BRNmx1Mn',
+      liffId: LIFF_ID,
       withLoginOnExternalBrowser: true
     })
-    .then(function() {
-      setStatus('2. liff.init done / isInClient=' + liff.isInClient());
+    .then(function () {
+      setStatus('liff.init done');
+
       return liff.getFriendship();
     })
-    .then(function(data) {
-      setStatus('3. getFriendship done / friendFlag=' + data.friendFlag);
+    .then(function (data) {
+      setStatus('friendFlag=' + data.friendFlag);
 
-      if (data.friendFlag) {
-        gtag('event', 'line_friend_add_test_liff_no_close', {
-          debug_mode: true,
-          event_category: 'liff_test',
-          event_label: 'friend_true_no_close',
-          event_callback: function () {
-            setStatus('4. GA4 callback returned / no close');
-          },
-          event_timeout: 3000
-        });
-
-        setStatus('3.5 GA4 event fired / waiting callback');
-      } else {
+      if (!data.friendFlag) {
         setStatus('not friend');
+        return;
       }
+
+      const alreadySent = localStorage.getItem(STORAGE_KEY);
+
+      if (alreadySent === '1') {
+        setStatus('already sent. closing...');
+
+        setTimeout(function () {
+          if (liff.isInClient()) {
+            liff.closeWindow();
+          } else {
+            setStatus('already sent. not in LINE client.');
+          }
+        }, 500);
+
+        return;
+      }
+
+      fireGa4AndClose();
     })
-    .catch(function(err) {
+    .catch(function (err) {
       setStatus('error: ' + JSON.stringify(err));
     });
   </script>
